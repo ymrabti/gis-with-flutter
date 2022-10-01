@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geojson_vi/geojson_vi.dart';
-import 'package:template_skeleton/src/libs/extensions.dart';
 import 'package:http/http.dart';
-import 'package:template_skeleton/src/libs/geojson2widget/polygon/properties.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
+import 'package:template_skeleton/libs/extensions/extensions.dart';
+import 'package:template_skeleton/libs/geojson2widget/polygon/properties.dart';
 
 Future<List<Polygon>> _networkPolygons(
   Uri urlString, {

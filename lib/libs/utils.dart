@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:template_skeleton/src/libs/geodesy.dart';
+import 'package:template_skeleton/libs/geodesy.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
 
 import 'package:dart_jts/dart_jts.dart' as dart_jts;

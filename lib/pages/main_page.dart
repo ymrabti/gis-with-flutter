@@ -3,12 +3,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
-import 'package:template_skeleton/src/libs/extensions.dart';
-import 'package:template_skeleton/src/libs/geojson2widget/polygon/index.dart';
-import 'package:template_skeleton/src/libs/geojson2widget/polygon/properties.dart';
-import 'package:template_skeleton/src/libs/lists.dart';
-import 'package:template_skeleton/src/libs/utils.dart';
-import 'package:template_skeleton/src/models/class.dart';
+import 'package:template_skeleton/libs/extensions/extensions.dart';
+import 'package:template_skeleton/libs/geojson2widget/polygon/index.dart';
+import 'package:template_skeleton/libs/geojson2widget/polygon/properties.dart';
+import 'package:template_skeleton/libs/lists.dart';
+import 'package:template_skeleton/libs/utils.dart';
+import 'package:template_skeleton/models/class.dart';
 import '../settings/settings_view.dart';
 
 /// Displays a list of SampleItems.
@@ -68,7 +68,8 @@ class _SampleItemListViewState extends State<SampleItemListView> {
               LayerPolygonProperties.label: 'NNH_NAME',
             },
             extraLayerPolygonProperties: const ExtraLayerPolygonProperties(
-              isDotted: true,
+              isDotted: false,
+              rotateLabel: true,
               labelStyle: TextStyle(
                 fontStyle: FontStyle.italic,
                 color: Colors.black,
