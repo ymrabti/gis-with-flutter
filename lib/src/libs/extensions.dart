@@ -3,58 +3,74 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
 import 'package:dart_jts/dart_jts.dart' as dart_jts;
 import 'package:point_in_polygon/point_in_polygon.dart';
+import 'package:template_skeleton/src/libs/geojson2widget/polygon/properties.dart';
 import 'package:template_skeleton/src/libs/utils.dart';
 
-extension LantLngX<T> on List<T> {
+extension StringX on String {
+  toUri() {
+    return Uri.parse(this);
+  }
+}
+
+extension HexColor on Color {
+  /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
+  static Color fromHex(String hexString) {
+    final buffer = StringBuffer();
+    if (hexString.length == 6 || hexString.length == 7) {
+      buffer.write('ff');
+      buffer.write(hexString.replaceFirst('#', ''));
+      return Color(int.parse(buffer.toString(), radix: 16));
+    } else {
+      return const Color(0xFFF2F2F2).withOpacity(0.3);
+    }
+  }
+
+  /// Prefixes a hash sign if [leadingHashSign] is set to `true` (default is `true`).
+  String toHex({bool leadingHashSign = true}) => '${leadingHashSign ? '#' : ''}'
+      '${alpha.toRadixString(16).padLeft(2, '0')}'
+      '${red.toRadixString(16).padLeft(2, '0')}'
+      '${green.toRadixString(16).padLeft(2, '0')}'
+      '${blue.toRadixString(16).padLeft(2, '0')}';
+}
+
+extension LantLngX<T> on List<List<double>> {
   List<latlong2.LatLng> toLatLng() {
     return map((e) {
-      var x = e is dart_jts.Coordinate
-          ? e.x
-          : e is List<double>
-              ? e[1]
-              : 0.0;
-      var y = e is dart_jts.Coordinate
-          ? e.y
-          : e is List<double>
-              ? e[0]
-              : 0.0;
+      var x = e[1];
+      var y = e[0];
+      return latlong2.LatLng(x, y);
+    }).toList();
+  }
+}
+
+extension LantLngCoordinate<T> on List<dart_jts.Coordinate> {
+  List<latlong2.LatLng> toLatLng() {
+    return map((e) {
+      var x = e.x;
+      var y = e.y;
       return latlong2.LatLng(x, y);
     }).toList();
   }
 }
 
 extension PolygonsXX on List<List<List<double>>> {
-  Polygon toPolygon({
-    bool isFilled = true,
-    Color color = Colors.blue,
-    Color borderColor = Colors.black,
-    double borderStrokeWidth = 0,
-    bool disableHolesBorder = false,
-    List<List<latlong2.LatLng>>? holePointsList,
-    bool isDotted = false,
-    String? label,
-    PolygonLabelPlacement labelPlacement = PolygonLabelPlacement.centroid,
-    TextStyle labelStyle = const TextStyle(),
-    bool rotateLabel = false,
-    StrokeCap strokeCap = StrokeCap.round,
-    StrokeJoin strokeJoin = StrokeJoin.round,
-  }) {
+  Polygon toPolygon({PolygonProperties polygonProperties = const PolygonProperties()}) {
     var holes = sublist(1).map((f) => f.toLatLng()).toList();
     var polygon = Polygon(
-      isFilled: isFilled,
-      color: color.withOpacity(0.5),
       points: first.toLatLng(),
-      borderColor: borderColor,
-      borderStrokeWidth: borderStrokeWidth,
-      disableHolesBorder: disableHolesBorder,
       holePointsList: holes,
-      isDotted: isDotted,
-      label: label,
-      labelPlacement: labelPlacement,
-      labelStyle: labelStyle,
-      rotateLabel: rotateLabel,
-      strokeCap: strokeCap,
-      strokeJoin: strokeJoin,
+      color: polygonProperties.fillColor,
+      isFilled: polygonProperties.isFilled,
+      borderColor: polygonProperties.borderColor,
+      borderStrokeWidth: polygonProperties.borderStokeWidth,
+      disableHolesBorder: polygonProperties.disableHolesBorder,
+      label: polygonProperties.label,
+      isDotted: polygonProperties.extraLayerPolygonProperties.isDotted,
+      labelPlacement: polygonProperties.extraLayerPolygonProperties.labelPlacement,
+      labelStyle: polygonProperties.extraLayerPolygonProperties.labelStyle,
+      rotateLabel: polygonProperties.extraLayerPolygonProperties.rotateLabel,
+      strokeCap: polygonProperties.extraLayerPolygonProperties.strokeCap,
+      strokeJoin: polygonProperties.extraLayerPolygonProperties.strokeJoin,
     );
     // consoleLog(polygon.area(), color: 35);
     return polygon;
@@ -133,16 +149,15 @@ extension PolygonX on Polygon {
     return polygon;
   }
 
-  bool isGeoPointInPolygon(latlong2.LatLng position) {
+  bool isGeoPointInPolygon(latlong2.LatLng latlng) {
     var isInPolygon = false;
     for (var i = 0, j = points.length - 1; i < points.length; j = i++) {
-      if ((((points[i].latitude <= position.latitude) &&
-                  (position.latitude < points[j].latitude)) ||
-              ((points[j].latitude <= position.latitude) &&
-                  (position.latitude < points[i].latitude))) &&
-          (position.longitude <
+      if ((((points[i].latitude <= latlng.latitude) && (latlng.latitude < points[j].latitude)) ||
+              ((points[j].latitude <= latlng.latitude) &&
+                  (latlng.latitude < points[i].latitude))) &&
+          (latlng.longitude <
               (points[j].longitude - points[i].longitude) *
-                      (position.latitude - points[i].latitude) /
+                      (latlng.latitude - points[i].latitude) /
                       (points[j].latitude - points[i].latitude) +
                   points[i].longitude)) isInPolygon = !isInPolygon;
     }

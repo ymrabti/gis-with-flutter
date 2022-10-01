@@ -4,6 +4,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
 import 'package:template_skeleton/src/libs/extensions.dart';
+import 'package:template_skeleton/src/libs/geojson2widget/polygon/index.dart';
+import 'package:template_skeleton/src/libs/geojson2widget/polygon/properties.dart';
 import 'package:template_skeleton/src/libs/lists.dart';
 import 'package:template_skeleton/src/libs/utils.dart';
 import 'package:template_skeleton/src/models/class.dart';
@@ -22,15 +24,17 @@ class SampleItemListView extends StatefulWidget {
 }
 
 class _SampleItemListViewState extends State<SampleItemListView> {
+  var latLng = latlong2.LatLng(34.92849168609999, -2.3225879568537056);
+  final MapController _mapController = MapController();
   @override
   Widget build(BuildContext context) {
     var interactiveFlags2 = InteractiveFlag.doubleTapZoom |
         InteractiveFlag.drag |
         InteractiveFlag.pinchZoom |
-        InteractiveFlag.rotate;
+        InteractiveFlag.pinchMove;
     var center = latlong2.LatLng(34.926447747065936, -2.3228343908943998);
-    double distanceMETERS = 10;
-    var distanceDMS = dmFromMeters(distanceMETERS);
+    // double distanceMETERS = 10;
+    // var distanceDMS = dmFromMeters(distanceMETERS);
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.appTitle),
@@ -44,9 +48,10 @@ class _SampleItemListViewState extends State<SampleItemListView> {
         ],
       ),
       body: FlutterMap(
+        mapController: _mapController,
         options: MapOptions(
           center: center,
-          zoom: 16,
+          zoom: 6,
           interactiveFlags: interactiveFlags2,
           onMapReady: () {},
         ),
@@ -56,13 +61,31 @@ class _SampleItemListViewState extends State<SampleItemListView> {
                 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
             userAgentPackageName: 'dev.fleaflet.flutter_map.example',
           ),
-          PolygonLayer(
-            polygons: getPolygon().toBuffer(20),
+          GeoJSONPolygons.network(
+            "https://ymrabti.github.io/undisclosed-tools/assets/geojson/polygons.json",
+            layerProperties: {
+              LayerPolygonProperties.fillColor: 'COLOR',
+              LayerPolygonProperties.label: 'NNH_NAME',
+            },
+            extraLayerPolygonProperties: const ExtraLayerPolygonProperties(
+              isDotted: true,
+              labelStyle: TextStyle(
+                fontStyle: FontStyle.italic,
+                color: Colors.black,
+                shadows: [
+                  Shadow(blurRadius: 10, color: Colors.white),
+                ],
+                decoration: TextDecoration.underline,
+              ),
+              labeled: true,
+            ),
+            mapController: _mapController,
           ),
+
           //   MarkerLayer(markers: getMarkers()),
           CircleLayer(circles: [
             CircleMarker(
-              point: center,
+              point: latLng,
               radius: 5,
               color: Colors.indigo.withOpacity(0.6),
               borderColor: Colors.black,
@@ -118,9 +141,14 @@ class _SampleItemListViewState extends State<SampleItemListView> {
   }
 
   Polygon getPolygon() {
-    return ringsHoled.toPolygon(
-      color: const Color(0xFF5E0365).withOpacity(0.5),
+    var polygon = ringsHoled.toPolygon(
+      polygonProperties: PolygonProperties(
+        fillColor: const Color(0xFF5E0365).withOpacity(0.5),
+      ),
     );
+    consoleLog(polygon.isGeoPointInPolygon(latLng));
+    consoleLog(polygon.isIntersectedWithPoint(latLng), color: 35);
+    return polygon;
   }
 
   List<Marker> getMarkers() {

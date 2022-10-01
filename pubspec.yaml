@@ -19,6 +19,8 @@ dependencies:
   latlong2: ^0.8.1
   flutter_map_marker_cluster: ^1.0.0
   point_in_polygon: ^1.0.0
+  geojson_vi: ^2.0.7
+  http: ^0.13.5
 
 dev_dependencies:
   flutter_test:
