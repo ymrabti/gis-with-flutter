@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum ConsoleStyles {
   normal,
   bold,
@@ -28,6 +30,6 @@ class Console {
     ConsoleColors color = ConsoleColors.white,
     ConsoleStyles consoleStyle = ConsoleStyles.bold,
   }) {
-    print('\x1B[${color.index + 30}m $text\x1B[${consoleStyle.index}m');
+    debugPrint('\x1B[${color.index + 30}m $text\x1B[${consoleStyle.index}m');
   }
 }

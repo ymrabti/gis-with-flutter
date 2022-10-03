@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:flutter_map/plugin_api.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart' as cluster;
 import 'package:latlong2/latlong.dart' as latlong2;
-import 'package:template_skeleton/libs/extensions/extensions.dart';
-import 'package:template_skeleton/libs/geojson2widget/polygon/index.dart';
-import 'package:template_skeleton/libs/geojson2widget/polygon/properties.dart';
-import 'package:template_skeleton/libs/lists.dart';
-import 'package:template_skeleton/libs/utils.dart';
+import 'package:template_skeleton/flutter_map_arcgis/flutter_map_arcgis.dart';
+import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
+import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/index.dart';
+import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
+import 'package:template_skeleton/flutter_map_geojson/lists.dart';
+import 'package:template_skeleton/flutter_map_geojson/utils.dart';
 import 'package:template_skeleton/models/class.dart';
 import '../settings/settings_view.dart';
 
@@ -26,6 +27,7 @@ class SampleItemListView extends StatefulWidget {
 class _SampleItemListViewState extends State<SampleItemListView> {
   var latLng = latlong2.LatLng(34.92849168609999, -2.3225879568537056);
   final MapController _mapController = MapController();
+  final FlutterMapState mapState = FlutterMapState();
   @override
   Widget build(BuildContext context) {
     var interactiveFlags2 = InteractiveFlag.doubleTapZoom |
@@ -61,27 +63,10 @@ class _SampleItemListViewState extends State<SampleItemListView> {
                 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
             userAgentPackageName: 'dev.fleaflet.flutter_map.example',
           ),
-          GeoJSONPolygons.network(
-            "https://ymrabti.github.io/undisclosed-tools/assets/geojson/polygons.json",
-            layerProperties: {
-              LayerPolygonProperties.fillColor: 'COLOR',
-              LayerPolygonProperties.label: 'NNH_NAME',
-            },
-            extraLayerPolygonProperties: const ExtraLayerPolygonProperties(
-              isDotted: false,
-              rotateLabel: true,
-              labelStyle: TextStyle(
-                fontStyle: FontStyle.italic,
-                color: Colors.black,
-                shadows: [
-                  Shadow(blurRadius: 10, color: Colors.white),
-                ],
-                decoration: TextDecoration.underline,
-              ),
-              labeled: true,
-            ),
-            mapController: _mapController,
-          ),
+          //   fLO(),
+
+          //   networkGeoJSONPolygon(),
+          //   fileGeoJSONPolygon(),
 
           //   MarkerLayer(markers: getMarkers()),
           CircleLayer(circles: [
@@ -100,35 +85,116 @@ class _SampleItemListViewState extends State<SampleItemListView> {
     );
   }
 
-  MarkerClusterLayerWidget clusters() {
-    // CupertinoLocalizationAr();
-    return MarkerClusterLayerWidget(
-      options: MarkerClusterLayerOptions(
-        maxClusterRadius: 45,
-        polygonOptions: const PolygonOptions(),
-        size: const Size(40, 40),
-        anchor: AnchorPos.align(AnchorAlign.center),
-        fitBoundsOptions: const FitBoundsOptions(
-          padding: EdgeInsets.all(50),
-          maxZoom: 15,
+  FeatureLayerOptions fLO() {
+    return FeatureLayerOptions(
+      "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Landscape_Trees/FeatureServer/0",
+      "point",
+    );
+  }
+
+  Widget fileGeoJSONPolygon() {
+    return GeoJSONPolygons.file(
+      "/storage/sdcard/Android/data/com.ymrabtiapps.gisflutter/files/geojson.json",
+      layerProperties: {
+        LayerPolygonProperties.fillColor: 'COLOR_BIO',
+        LayerPolygonProperties.label: 'NAME',
+      },
+      extraLayerPolygonProperties: const ExtraLayerPolygonProperties(
+        isDotted: false,
+        rotateLabel: true,
+        labelStyle: TextStyle(
+          fontStyle: FontStyle.italic,
+          color: Colors.black,
+          shadows: [
+            Shadow(blurRadius: 10, color: Colors.white),
+          ],
+          decoration: TextDecoration.underline,
         ),
+        labeled: true,
+      ),
+      mapController: _mapController,
+    );
+  }
+
+  Widget networkGeoJSONPolygon() {
+    return GeoJSONPolygons.network(
+      "https://ymrabti.github.io/undisclosed-tools/assets/geojson/polygons.json",
+      layerProperties: {
+        LayerPolygonProperties.fillColor: 'COLOR',
+        LayerPolygonProperties.label: 'NNH_NAME',
+      },
+      extraLayerPolygonProperties: const ExtraLayerPolygonProperties(
+        isDotted: false,
+        rotateLabel: true,
+        labelStyle: TextStyle(
+          fontStyle: FontStyle.italic,
+          color: Colors.black,
+          shadows: [
+            Shadow(blurRadius: 10, color: Colors.white),
+          ],
+          decoration: TextDecoration.underline,
+        ),
+        labeled: true,
+      ),
+      mapController: _mapController,
+    );
+  }
+
+  cluster.MarkerClusterLayerWidget clusters() {
+    // CupertinoLocalizationAr();
+    var markerClusterLayerWidget = cluster.MarkerClusterLayerWidget(
+        options: cluster.MarkerClusterLayerOptions(
+      maxClusterRadius: 45,
+      polygonOptions: const cluster.PolygonOptions(),
+      size: const Size(40, 40),
+      anchor: AnchorPos.align(AnchorAlign.center),
+      fitBoundsOptions: const FitBoundsOptions(
+        padding: EdgeInsets.all(50),
+        maxZoom: 15,
+      ),
+      markers: getMarkers(),
+      builder: (context, markers) {
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFF361EA1),
+          ),
+          child: Center(
+            child: Text(
+              markers.length.toString(),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      },
+    ));
+    /* var popupMarkerLayerWidget = PopupMarkerLayerWidget(
+      options: PopupMarkerLayerOptions(
+        popupSnap: PopupSnap.markerBottom,
         markers: getMarkers(),
-        builder: (context, markers) {
+        markerRotate: false,
+        onPopupEvent: (event, selectedMarkers) {
+          Console.log(selectedMarkers, color: ConsoleColors.red);
+        },
+        popupBuilder: (context, marker) {
           return Container(
+            width: 200,
+            height: 90,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: const Color(0xFF361EA1),
+              color: const Color(0x88361EA1),
             ),
             child: Center(
               child: Text(
-                markers.length.toString(),
+                marker.toString(),
                 style: const TextStyle(color: Colors.white),
               ),
             ),
           );
         },
       ),
-    );
+    ); */
+    return markerClusterLayerWidget;
   }
 
   double recalc(DestinationDS distanceDMS) {

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:template_skeleton/libs/console.dart';
+import 'package:template_skeleton/flutter_map_geojson/console.dart';
 
 var esri2geo = {};
 toGeoJSON(Map<String, dynamic> data) {

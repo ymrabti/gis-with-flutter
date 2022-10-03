@@ -3,11 +3,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
 import 'package:dart_jts/dart_jts.dart' as dart_jts;
 import 'package:point_in_polygon/point_in_polygon.dart';
-import 'package:template_skeleton/libs/geojson2widget/polygon/properties.dart';
-import 'package:template_skeleton/libs/utils.dart';
+import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
+import 'package:template_skeleton/flutter_map_geojson/utils.dart';
 
 extension StringX on String {
-  toUri() {
+  Uri toUri() {
     return Uri.parse(this);
   }
 }
