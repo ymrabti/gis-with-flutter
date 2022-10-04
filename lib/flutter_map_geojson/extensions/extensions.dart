@@ -1,6 +1,9 @@
+import 'dart:math';
+
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart' as latlong2;
+import 'package:latlong2/latlong.dart';
 import 'package:dart_jts/dart_jts.dart' as dart_jts;
 import 'package:point_in_polygon/point_in_polygon.dart';
 import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
@@ -14,14 +17,14 @@ extension StringX on String {
 
 extension HexColor on Color {
   /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
-  static Color fromHex(String hexString) {
+  static Color fromHex(String hexString, Color fallColor) {
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) {
       buffer.write('ff');
       buffer.write(hexString.replaceFirst('#', ''));
       return Color(int.parse(buffer.toString(), radix: 16));
     } else {
-      return const Color(0xFFF2F2F2).withOpacity(0.3);
+      return fallColor;
     }
   }
 
@@ -34,50 +37,26 @@ extension HexColor on Color {
 }
 
 extension LantLngX<T> on List<List<double>> {
-  List<latlong2.LatLng> toLatLng() {
+  List<LatLng> toLatLng() {
     return map((e) {
       var x = e[1];
       var y = e[0];
-      return latlong2.LatLng(x, y);
+      return LatLng(x, y);
     }).toList();
   }
 }
 
 extension LantLngCoordinate<T> on List<dart_jts.Coordinate> {
-  List<latlong2.LatLng> toLatLng() {
+  List<LatLng> toLatLng() {
     return map((e) {
       var x = e.x;
       var y = e.y;
-      return latlong2.LatLng(x, y);
+      return LatLng(x, y);
     }).toList();
   }
 }
 
-extension PolygonsXX on List<List<List<double>>> {
-  Polygon toPolygon({PolygonProperties polygonProperties = const PolygonProperties()}) {
-    var holes = sublist(1).map((f) => f.toLatLng()).toList();
-    var polygon = Polygon(
-      points: first.toLatLng(),
-      holePointsList: holes,
-      color: polygonProperties.fillColor,
-      isFilled: polygonProperties.isFilled,
-      borderColor: polygonProperties.borderColor,
-      borderStrokeWidth: polygonProperties.borderStokeWidth,
-      disableHolesBorder: polygonProperties.disableHolesBorder,
-      label: polygonProperties.label,
-      isDotted: polygonProperties.extraLayerPolygonProperties.isDotted,
-      labelPlacement: polygonProperties.extraLayerPolygonProperties.labelPlacement,
-      labelStyle: polygonProperties.extraLayerPolygonProperties.labelStyle,
-      rotateLabel: polygonProperties.extraLayerPolygonProperties.rotateLabel,
-      strokeCap: polygonProperties.extraLayerPolygonProperties.strokeCap,
-      strokeJoin: polygonProperties.extraLayerPolygonProperties.strokeJoin,
-    );
-    // consoleLog(polygon.area(), color: 35);
-    return polygon;
-  }
-}
-
-extension Coordinatex on List<latlong2.LatLng> {
+extension Coordinatex on List<LatLng> {
   List<dart_jts.Coordinate> toCoordinates() {
     return map((e) => dart_jts.Coordinate(e.latitude, e.longitude)).toList();
   }
@@ -149,7 +128,7 @@ extension PolygonX on Polygon {
     return polygon;
   }
 
-  bool isGeoPointInPolygon(latlong2.LatLng latlng) {
+  bool isGeoPointInPolygon(LatLng latlng) {
     var isInPolygon = false;
     for (var i = 0, j = points.length - 1; i < points.length; j = i++) {
       if ((((points[i].latitude <= latlng.latitude) && (latlng.latitude < points[j].latitude)) ||
@@ -164,7 +143,7 @@ extension PolygonX on Polygon {
     return isInPolygon;
   }
 
-  bool isIntersectedWithPoint(latlong2.LatLng latlng) {
+  bool isIntersectedWithPoint(LatLng latlng) {
     var currPoint = Point(
       x: latlng.latitude,
       y: latlng.longitude,
@@ -179,5 +158,75 @@ extension PolygonX on Polygon {
       }).toList(),
     );
     return pInP;
+  }
+
+  bool isGeoPointInsidePolygon(LatLng position) {
+    // Check if the point sits exactly on a vertex
+    // var vertexPosition = points.firstWhere((point) => point == position, orElse: () => null);
+    LatLng? vertexPosition = points.firstWhereOrNull((point) => point == position);
+    if (vertexPosition != null) {
+      return true;
+    }
+
+    // Check if the point is inside the polygon or on the boundary
+    int intersections = 0;
+    var verticesCount = points.length;
+
+    for (int i = 1; i < verticesCount; i++) {
+      LatLng vertex1 = points[i - 1];
+      LatLng vertex2 = points[i];
+
+      // Check if point is on an horizontal polygon boundary
+      if (vertex1.latitude == vertex2.latitude &&
+          vertex1.latitude == position.latitude &&
+          position.longitude > min(vertex1.longitude, vertex2.longitude) &&
+          position.longitude < max(vertex1.longitude, vertex2.longitude)) {
+        return true;
+      }
+
+      if (position.latitude > min(vertex1.latitude, vertex2.latitude) &&
+          position.latitude <= max(vertex1.latitude, vertex2.latitude) &&
+          position.longitude <= max(vertex1.longitude, vertex2.longitude) &&
+          vertex1.latitude != vertex2.latitude) {
+        var xinters = (position.latitude - vertex1.latitude) *
+                (vertex2.longitude - vertex1.longitude) /
+                (vertex2.latitude - vertex1.latitude) +
+            vertex1.longitude;
+        if (xinters == position.longitude) {
+          // Check if point is on the polygon boundary (other than horizontal)
+          return true;
+        }
+        if (vertex1.longitude == vertex2.longitude || position.longitude <= xinters) {
+          intersections++;
+        }
+      }
+    }
+
+    // If the number of edges we passed through is odd, then it's in the polygon.
+    return intersections % 2 != 0;
+  }
+}
+
+extension PolygonsXX on List<List<List<double>>> {
+  Polygon toPolygon({PolygonProperties polygonProperties = const PolygonProperties()}) {
+    var holes = sublist(1).map((f) => f.toLatLng()).toList();
+    var polygon = Polygon(
+      points: first.toLatLng(),
+      holePointsList: holes,
+      color: polygonProperties.fillColor,
+      isFilled: polygonProperties.isFilled,
+      borderColor: polygonProperties.borderColor,
+      borderStrokeWidth: polygonProperties.borderStokeWidth,
+      disableHolesBorder: polygonProperties.disableHolesBorder,
+      label: polygonProperties.label,
+      isDotted: polygonProperties.isDotted,
+      labelPlacement: polygonProperties.labelPlacement,
+      labelStyle: polygonProperties.labelStyle,
+      rotateLabel: polygonProperties.rotateLabel,
+      strokeCap: polygonProperties.strokeCap,
+      strokeJoin: polygonProperties.strokeJoin,
+    );
+    // consoleLog(polygon.area(), color: 35);
+    return polygon;
   }
 }

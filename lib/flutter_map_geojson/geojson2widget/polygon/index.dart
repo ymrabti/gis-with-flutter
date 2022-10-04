@@ -7,62 +7,41 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geojson_vi/geojson_vi.dart';
 import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
-import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:template_skeleton/flutter_map_geojson/console.dart';
+import 'package:template_skeleton/flutter_map_geojson/utils.dart';
 import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
 import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
 
-Future<Directory> getDocumentsDir() async => await path_provider.getApplicationDocumentsDirectory();
-
-Future<List<Directory>?> getExternalDir() async {
-  var externalStorageDirectories = await path_provider.getExternalStorageDirectories();
-  return externalStorageDirectories;
-}
-
-Future<void> generateCsv(String data) async {
+Future<File> _createFile(String data) async {
   var instance = await SharedPreferences.getInstance();
   /* var pathShared = instance.getString('geojson'); */
   var list = await getExternalDir();
   var directory = ((list == null) ? Directory('path') : list[0]).path;
   final path = "$directory/geojson.json";
-  Console.log(
-    directory,
-    color: ConsoleColors.violet,
-    consoleStyle: ConsoleStyles.italic,
-  );
   final File file = File(path);
   var exists = await file.exists();
   if (!exists) {
     var savedFile = await file.writeAsString(data.toString());
-    Console.log(
-      savedFile,
-      color: ConsoleColors.violet,
-      consoleStyle: ConsoleStyles.italic,
-    );
-    instance.setString('geojson', savedFile.path);
+    await instance.setString('geojson', savedFile.path);
+    return savedFile;
   }
+  return file;
 }
 
 Future<List<Polygon>> _filePolygons(
   String path, {
-  Map<LayerPolygonProperties, String>? layerProperties,
-  required ExtraLayerPolygonProperties extraLayerPolygonProperties,
+  Map<LayerPolygonIndexes, String>? layerProperties,
+  required PolygonProperties polygonLayerProperties,
   MapController? mapController,
 }) async {
   final file = File(path);
   var exists = await file.exists();
-  Console.log(
-    exists,
-    color: ConsoleColors.green,
-    consoleStyle: ConsoleStyles.bold,
-  );
   if (exists) {
     var string = await file.readAsString();
     return _string(
       string,
-      layerProperties: layerProperties,
-      extraLayerPolygonProperties: extraLayerPolygonProperties,
+      layerMap: layerProperties,
+      polygonPropertie: polygonLayerProperties,
       mapController: mapController,
     );
   } else {
@@ -72,15 +51,16 @@ Future<List<Polygon>> _filePolygons(
 
 Future<List<Polygon>> _assetPolygons(
   String path, {
-  Map<LayerPolygonProperties, String>? layerProperties,
-  required ExtraLayerPolygonProperties extraLayerPolygonProperties,
+  Map<LayerPolygonIndexes, String>? layerProperties,
+  required PolygonProperties polygonProperties,
   MapController? mapController,
 }) async {
   final string = await rootBundle.loadString(path);
+  await _createFile(string);
   return _string(
     string,
-    layerProperties: layerProperties,
-    extraLayerPolygonProperties: extraLayerPolygonProperties,
+    layerMap: layerProperties,
+    polygonPropertie: polygonProperties,
     mapController: mapController,
   );
 }
@@ -89,26 +69,25 @@ Future<List<Polygon>> _networkPolygons(
   Uri urlString, {
   Client? client,
   Map<String, String>? headers,
-  Map<LayerPolygonProperties, String>? layerProperties,
-  required ExtraLayerPolygonProperties extraLayerPolygonProperties,
+  Map<LayerPolygonIndexes, String>? layerProperties,
+  required PolygonProperties polygonLayerProperties,
   MapController? mapController,
 }) async {
   var method = client == null ? get : client.get;
   var response = await method(urlString, headers: headers);
   var string = response.body;
-  await generateCsv(string);
   return _string(
     string,
-    layerProperties: layerProperties,
-    extraLayerPolygonProperties: extraLayerPolygonProperties,
+    layerMap: layerProperties,
+    polygonPropertie: polygonLayerProperties,
     mapController: mapController,
   );
 }
 
 List<Polygon> _string(
   String string, {
-  Map<LayerPolygonProperties, String>? layerProperties,
-  required ExtraLayerPolygonProperties extraLayerPolygonProperties,
+  Map<LayerPolygonIndexes, String>? layerMap,
+  required PolygonProperties polygonPropertie,
   MapController? mapController,
 }) {
   final geojson = GeoJSONFeatureCollection.fromMap(jsonDecode(string));
@@ -118,8 +97,8 @@ List<Polygon> _string(
       var properties = elm.properties;
       var polygonProperties = PolygonProperties.fromMap(
         properties,
-        layerProperties,
-        extraLayerPolygonProperties: extraLayerPolygonProperties,
+        layerMap,
+        polygonLayerProperties: polygonPropertie,
       );
       if (geometry is GeoJSONPolygon) {
         return [geometry.coordinates.toPolygon(polygonProperties: polygonProperties)];
@@ -148,8 +127,8 @@ class GeoJSONPolygons {
     String url, {
     Client? client,
     Map<String, String>? headers,
-    Map<LayerPolygonProperties, String>? layerProperties,
-    ExtraLayerPolygonProperties extraLayerPolygonProperties = const ExtraLayerPolygonProperties(),
+    Map<LayerPolygonIndexes, String>? layerProperties,
+    PolygonProperties polygonLayerProperties = const PolygonProperties(),
     MapController? mapController,
     Key? key,
     bool polygonCulling = false,
@@ -161,7 +140,7 @@ class GeoJSONPolygons {
         headers: headers,
         client: client,
         layerProperties: layerProperties,
-        extraLayerPolygonProperties: extraLayerPolygonProperties,
+        polygonLayerProperties: polygonLayerProperties,
         mapController: mapController,
       ),
       builder: (context, snap) {
@@ -183,8 +162,8 @@ class GeoJSONPolygons {
 
   static Widget asset(
     String url, {
-    Map<LayerPolygonProperties, String>? layerProperties,
-    ExtraLayerPolygonProperties extraLayerPolygonProperties = const ExtraLayerPolygonProperties(),
+    Map<LayerPolygonIndexes, String>? layerProperties,
+    PolygonProperties polygonProperties = const PolygonProperties(),
     MapController? mapController,
     Key? key,
     bool polygonCulling = false,
@@ -193,7 +172,7 @@ class GeoJSONPolygons {
       future: _assetPolygons(
         url,
         layerProperties: layerProperties,
-        extraLayerPolygonProperties: extraLayerPolygonProperties,
+        polygonProperties: polygonProperties,
         mapController: mapController,
       ),
       builder: (context, snap) {
@@ -215,8 +194,8 @@ class GeoJSONPolygons {
 
   static Widget file(
     String path, {
-    Map<LayerPolygonProperties, String>? layerProperties,
-    ExtraLayerPolygonProperties extraLayerPolygonProperties = const ExtraLayerPolygonProperties(),
+    Map<LayerPolygonIndexes, String>? layerProperties,
+    PolygonProperties polygonLayerProperties = const PolygonProperties(),
     MapController? mapController,
     Key? key,
     bool polygonCulling = false,
@@ -225,7 +204,7 @@ class GeoJSONPolygons {
       future: _filePolygons(
         path,
         layerProperties: layerProperties,
-        extraLayerPolygonProperties: extraLayerPolygonProperties,
+        polygonLayerProperties: polygonLayerProperties,
         mapController: mapController,
       ),
       builder: (context, snap) {
@@ -247,8 +226,8 @@ class GeoJSONPolygons {
 
   static Widget string(
     String data, {
-    Map<LayerPolygonProperties, String>? layerProperties,
-    ExtraLayerPolygonProperties extraLayerPolygonProperties = const ExtraLayerPolygonProperties(),
+    Map<LayerPolygonIndexes, String>? layerProperties,
+    PolygonProperties polygonLayerProperties = const PolygonProperties(),
     MapController? mapController,
     Key? key,
     bool polygonCulling = false,
@@ -256,7 +235,7 @@ class GeoJSONPolygons {
     return PolygonLayer(
       polygons: _string(
         data,
-        extraLayerPolygonProperties: extraLayerPolygonProperties,
+        polygonPropertie: polygonLayerProperties,
       ),
       key: key,
       polygonCulling: polygonCulling,

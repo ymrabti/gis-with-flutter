@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proj4dart/proj4dart.dart' as proj4dart;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart' as cluster;
@@ -7,8 +8,12 @@ import 'package:template_skeleton/flutter_map_arcgis/flutter_map_arcgis.dart';
 import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
 import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/index.dart';
 import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
-import 'package:template_skeleton/flutter_map_geojson/lists.dart';
-import 'package:template_skeleton/flutter_map_geojson/utils.dart';
+import 'package:template_skeleton/pages/polygons/asset.dart';
+import 'package:template_skeleton/pages/polygons/file.dart';
+import 'package:template_skeleton/pages/polygons/network.dart';
+import 'package:template_skeleton/pages/polygons/string.dart';
+import 'package:template_skeleton/utils/console.dart';
+import 'package:template_skeleton/utils/lists.dart';
 import 'package:template_skeleton/models/class.dart';
 import '../settings/settings_view.dart';
 
@@ -53,7 +58,7 @@ class _SampleItemListViewState extends State<SampleItemListView> {
         mapController: _mapController,
         options: MapOptions(
           center: center,
-          zoom: 6,
+          zoom: 11,
           interactiveFlags: interactiveFlags2,
           onMapReady: () {},
         ),
@@ -63,16 +68,18 @@ class _SampleItemListViewState extends State<SampleItemListView> {
                 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
             userAgentPackageName: 'dev.fleaflet.flutter_map.example',
           ),
-          //   fLO(),
+          // fLO(),
 
-          //   networkGeoJSONPolygon(),
-          //   fileGeoJSONPolygon(),
+          NetworkGeoJSONPolygon(mapController: _mapController),
+          FileGeoJSONPolygon(mapController: _mapController),
+          AssetGeoJSONPolygon(mapController: _mapController),
+          StringGeoJSONPolygon(mapController: _mapController),
 
           //   MarkerLayer(markers: getMarkers()),
           CircleLayer(circles: [
             CircleMarker(
               point: latLng,
-              radius: 5,
+              radius: 500,
               color: Colors.indigo.withOpacity(0.6),
               borderColor: Colors.black,
               borderStrokeWidth: 5,
@@ -89,54 +96,6 @@ class _SampleItemListViewState extends State<SampleItemListView> {
     return FeatureLayerOptions(
       "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Landscape_Trees/FeatureServer/0",
       "point",
-    );
-  }
-
-  Widget fileGeoJSONPolygon() {
-    return GeoJSONPolygons.file(
-      "/storage/sdcard/Android/data/com.ymrabtiapps.gisflutter/files/geojson.json",
-      layerProperties: {
-        LayerPolygonProperties.fillColor: 'COLOR_BIO',
-        LayerPolygonProperties.label: 'NAME',
-      },
-      extraLayerPolygonProperties: const ExtraLayerPolygonProperties(
-        isDotted: false,
-        rotateLabel: true,
-        labelStyle: TextStyle(
-          fontStyle: FontStyle.italic,
-          color: Colors.black,
-          shadows: [
-            Shadow(blurRadius: 10, color: Colors.white),
-          ],
-          decoration: TextDecoration.underline,
-        ),
-        labeled: true,
-      ),
-      mapController: _mapController,
-    );
-  }
-
-  Widget networkGeoJSONPolygon() {
-    return GeoJSONPolygons.network(
-      "https://ymrabti.github.io/undisclosed-tools/assets/geojson/polygons.json",
-      layerProperties: {
-        LayerPolygonProperties.fillColor: 'COLOR',
-        LayerPolygonProperties.label: 'NNH_NAME',
-      },
-      extraLayerPolygonProperties: const ExtraLayerPolygonProperties(
-        isDotted: false,
-        rotateLabel: true,
-        labelStyle: TextStyle(
-          fontStyle: FontStyle.italic,
-          color: Colors.black,
-          shadows: [
-            Shadow(blurRadius: 10, color: Colors.white),
-          ],
-          decoration: TextDecoration.underline,
-        ),
-        labeled: true,
-      ),
-      mapController: _mapController,
     );
   }
 
@@ -213,8 +172,8 @@ class _SampleItemListViewState extends State<SampleItemListView> {
         fillColor: const Color(0xFF5E0365).withOpacity(0.5),
       ),
     );
-    consoleLog(polygon.isGeoPointInPolygon(latLng));
-    consoleLog(polygon.isIntersectedWithPoint(latLng), color: 35);
+    Console.log(polygon.isGeoPointInPolygon(latLng));
+    Console.log(polygon.isIntersectedWithPoint(latLng), color: ConsoleColors.teal);
     return polygon;
   }
 

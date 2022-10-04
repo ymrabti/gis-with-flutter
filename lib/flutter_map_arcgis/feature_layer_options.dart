@@ -4,6 +4,54 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 
+typedef ClusterWidgetBuilder = Widget Function(BuildContext context, List<Marker> markers);
+
+class PolygonEsri extends Polygon {
+  final List<LatLng> markers;
+  final List<Offset> offseets = [];
+  final Color coleur;
+  final double borderStrokeSize;
+  final Color borderColeur;
+  final bool isdotted;
+  final bool isfilled;
+  final dynamic attributes;
+  late final LatLngBounds boundingbox;
+
+  PolygonEsri({
+    required this.markers,
+    this.coleur = const Color(0xFF00FF00),
+    this.borderStrokeSize = 0.0,
+    this.borderColeur = const Color(0xFFFFFF00),
+    this.isdotted = false,
+    this.isfilled = false,
+    this.attributes,
+  }) : super(points: markers) {
+    boundingbox = LatLngBounds.fromPoints(points);
+  }
+}
+
+class PolyLineEsri extends Polyline {
+  final List<LatLng> markers;
+  final List<Offset> offseets = [];
+  final Color coleur;
+  final double borderStrokeSize;
+  final Color borderColeur;
+  final bool isdotted;
+  final dynamic attributes;
+  late final LatLngBounds boundingbox;
+
+  PolyLineEsri({
+    required this.markers,
+    this.coleur = const Color(0xFF00FF00),
+    this.borderStrokeSize = 0.0,
+    this.borderColeur = const Color(0xFFFFFF00),
+    this.isdotted = false,
+    this.attributes,
+  }) : super(points: markers) {
+    boundingBox = LatLngBounds.fromPoints(points);
+  }
+}
+
 class PolygonOptions {
   final Color color;
   final double borderStrokeWidth;
@@ -63,56 +111,37 @@ class AnimationsOptions {
   });
 }
 
-typedef ClusterWidgetBuilder = Widget Function(BuildContext context, List<Marker> markers);
-
 class FeatureLayerOptions extends TileLayer {
-  /// Cluster size
   final Size size;
 
-  /// Cluster compute size
   final Size Function(List<Marker>)? computeSize;
 
-  /// Cluster anchor
   final AnchorPos? anchor;
 
-  /// A cluster will cover at most this many pixels from its center
   final int maxClusterRadius;
 
-  /// Feature layer URL
   final String url;
 
-  /// Feature layer URL
   final String geometryType;
 
-  /// Options for fit bounds
   final FitBoundsOptions fitBoundsOptions;
 
-  /// Zoom buonds with animation on click cluster
   final bool zoomToBoundsOnClick;
 
-  /// animations options
   final AnimationsOptions animationsOptions;
 
-  /// When click marker, center it with animation
   final bool centerMarkerOnClick;
 
-  /// Increase to increase the distance away that circle spiderfied markers appear from the center
   final int spiderfyCircleRadius;
 
-  /// Increase to increase the distance away that spiral spiderfied markers appear from the center
   final int spiderfySpiralDistanceMultiplier;
 
-  /// Show spiral instead of circle from this marker count upwards.
-  /// 0 -> always spiral; Infinity -> always circle
   final int circleSpiralSwitchover;
 
-  /// Make it possible to provide custom function to calculate spiderfy shape positions
   final List<Point> Function(int, Point)? spiderfyShapePositions;
 
-  /// Render
   final dynamic Function(dynamic attributes)? render;
 
-  /// Function to call when a Marker is tapped
   final void Function(dynamic attributes, LatLng location)? onTap;
 
   FeatureLayerOptions(

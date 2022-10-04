@@ -1,13 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:template_skeleton/flutter_map_geojson/geodesy.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
-
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:dart_jts/dart_jts.dart' as dart_jts;
-
-void consoleLog(dynamic text, {int color = 37}) {
-  debugPrint('\x1B[${color}m $text\x1B[0m');
-}
 
 double dmFromMeters(double distanceMETERS) {
   Geodesy geodesy = Geodesy();
@@ -40,4 +37,11 @@ Polygon calcBuffer(double distanceDMS, List<List<double>> ring) {
     color: const Color(0xFFF321D0).withOpacity(0.5),
   );
   return polygon;
+}
+
+Future<Directory> getDocumentsDir() async => await path_provider.getApplicationDocumentsDirectory();
+
+Future<List<Directory>?> getExternalDir() async {
+  var externalStorageDirectories = await path_provider.getExternalStorageDirectories();
+  return externalStorageDirectories;
 }
