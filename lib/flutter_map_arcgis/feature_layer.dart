@@ -1,10 +1,11 @@
+import 'package:console_tools/console_tools.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:template_skeleton/flutter_map_arcgis/util.dart';
 import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
-import 'package:template_skeleton/utils/console.dart';
+import 'package:template_skeleton/flutter_map_geojson/extensions/polygon.dart';
 import 'feature_layer_options.dart';
 import 'package:tuple/tuple.dart';
 import 'package:http/http.dart';
@@ -16,7 +17,12 @@ class FeatureLayer extends StatefulWidget {
   final FlutterMapState map;
   final Stream stream;
 
-  const FeatureLayer(this.options, this.map, this.stream, {super.key});
+  const FeatureLayer({
+    required this.options,
+    required this.map,
+    required this.stream,
+    super.key,
+  });
 
   @override
   State<StatefulWidget> createState() => _FeatureLayerState();
@@ -130,6 +136,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
 
   void _resetGrid() {
     var map = widget.map;
+    Console.log('map.options${map.options}');
     var crs = map.options.crs;
     var tileZoom = _tileZoom;
 

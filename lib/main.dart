@@ -9,9 +9,5 @@ void main() async {
 
   await settingsController.loadSettings();
 
-  runApp(
-    MyApp(
-      settingsController: settingsController,
-    ),
-  );
+  runApp(MyApp(settingsController: settingsController));
 }

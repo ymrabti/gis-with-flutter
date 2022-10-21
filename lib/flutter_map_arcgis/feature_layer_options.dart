@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map/flutter_map.dart' as fmap;
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -111,7 +112,7 @@ class AnimationsOptions {
   });
 }
 
-class FeatureLayerOptions extends TileLayer {
+class FeatureLayerOptions extends MapOptions {
   final Size size;
 
   final Size Function(List<Marker>)? computeSize;
@@ -147,7 +148,6 @@ class FeatureLayerOptions extends TileLayer {
   FeatureLayerOptions(
     this.url,
     this.geometryType, {
-    super.key,
     this.size = const Size(30, 30),
     this.computeSize,
     this.anchor,

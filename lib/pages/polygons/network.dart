@@ -17,7 +17,7 @@ class NetworkGeoJSONPolygon extends StatelessWidget {
     return GeoJSONPolygons.network(
       "https://ymrabti.github.io/undisclosed-tools/assets/geojson/polygons.json",
       layerProperties: {
-        LayerPolygonIndexes.fillColor: 'COLOOR',
+        LayerPolygonIndexes.fillColor: 'COLOR',
         LayerPolygonIndexes.label: 'ECO_NAME',
       },
       polygonLayerProperties: const PolygonProperties(

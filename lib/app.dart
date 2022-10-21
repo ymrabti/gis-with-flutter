@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:template_skeleton/pages/custom/custom_crs.dart';
 
 import 'pages/main_page.dart';
 import 'settings/settings_controller.dart';
@@ -48,10 +49,10 @@ class MyApp extends StatelessWidget {
                 switch (routeSettings.name) {
                   case SettingsView.routeName:
                     return SettingsView(controller: settingsController);
-                  case SampleItemListView.routeName:
-                    return const SampleItemListView();
+                  case GeojsonTestsPage.routeName:
+                    return const GeojsonTestsPage();
                   default:
-                    return const SampleItemListView();
+                    return const CustomCrsPage();
                 }
               },
             );

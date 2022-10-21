@@ -27,6 +27,7 @@ dependencies:
   tuple: ^2.0.0
   geobase: ^0.3.2
   proj4dart: ^2.1.0
+  console_tools: ^1.0.0
 
 dev_dependencies:
   flutter_test:

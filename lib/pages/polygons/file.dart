@@ -16,15 +16,13 @@ class FileGeoJSONPolygon extends StatelessWidget {
   Widget build(BuildContext context) {
     return GeoJSONPolygons.file(
       "/storage/emulated/0/Android/data/com.ymrabtiapps.gisflutter/files/geojson.json",
-      layerProperties: {
-        LayerPolygonIndexes.fillColor: 'COLOR_BIO',
-        LayerPolygonIndexes.label: 'NAME_BIO',
-      },
       polygonLayerProperties: const PolygonProperties(
         isDotted: false,
         rotateLabel: true,
         label: 'File',
         fillColor: Color(0xFF7F0573),
+        isFilled: true,
+        borderColor: Colors.red,
         labelStyle: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,

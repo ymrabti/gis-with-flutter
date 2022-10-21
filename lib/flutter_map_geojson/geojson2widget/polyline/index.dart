@@ -9,10 +9,10 @@ import 'package:geojson_vi/geojson_vi.dart';
 import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:template_skeleton/flutter_map_geojson/extensions/polygon.dart';
+import 'package:template_skeleton/flutter_map_geojson/extensions/polyline.dart';
 import 'package:template_skeleton/flutter_map_geojson/utils.dart';
 import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
+import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polyline/properties.dart';
 import 'package:template_skeleton/utils/lists.dart';
 
 Future<File> _createFile() async {
@@ -31,10 +31,10 @@ Future<File> _createFile() async {
   return file;
 }
 
-Future<List<Polygon>> _filePolygons(
+Future<List<Polyline>> _filePolylines(
   String path, {
-  Map<LayerPolygonIndexes, String>? layerProperties,
-  required PolygonProperties polygonLayerProperties,
+  Map<LayerPolylineIndexes, String>? layerProperties,
+  required PolylineProperties polylineLayerProperties,
   MapController? mapController,
 }) async {
   final file = File(path);
@@ -44,7 +44,7 @@ Future<List<Polygon>> _filePolygons(
     return _string(
       readasstring,
       layerMap: layerProperties,
-      polygonPropertie: polygonLayerProperties,
+      polylinePropertie: polylineLayerProperties,
       mapController: mapController,
     );
   } else {
@@ -52,10 +52,10 @@ Future<List<Polygon>> _filePolygons(
   }
 }
 
-Future<List<Polygon>> _memoryPolygons(
+Future<List<Polyline>> _memoryPolylines(
   Uint8List list, {
-  Map<LayerPolygonIndexes, String>? layerProperties,
-  required PolygonProperties polygonLayerProperties,
+  Map<LayerPolylineIndexes, String>? layerProperties,
+  required PolylineProperties polylineLayerProperties,
   MapController? mapController,
 }) async {
   File file = File.fromRawPath(list);
@@ -63,15 +63,15 @@ Future<List<Polygon>> _memoryPolygons(
   return _string(
     string,
     layerMap: layerProperties,
-    polygonPropertie: polygonLayerProperties,
+    polylinePropertie: polylineLayerProperties,
     mapController: mapController,
   );
 }
 
-Future<List<Polygon>> _assetPolygons(
+Future<List<Polyline>> _assetPolylines(
   String path, {
-  Map<LayerPolygonIndexes, String>? layerProperties,
-  required PolygonProperties polygonProperties,
+  Map<LayerPolylineIndexes, String>? layerProperties,
+  required PolylineProperties polylineProperties,
   MapController? mapController,
 }) async {
   final string = await rootBundle.loadString(path);
@@ -79,17 +79,17 @@ Future<List<Polygon>> _assetPolygons(
   return _string(
     string,
     layerMap: layerProperties,
-    polygonPropertie: polygonProperties,
+    polylinePropertie: polylineProperties,
     mapController: mapController,
   );
 }
 
-Future<List<Polygon>> _networkPolygons(
+Future<List<Polyline>> _networkPolylines(
   Uri urlString, {
   Client? client,
   Map<String, String>? headers,
-  Map<LayerPolygonIndexes, String>? layerProperties,
-  required PolygonProperties polygonLayerProperties,
+  Map<LayerPolylineIndexes, String>? layerProperties,
+  required PolylineProperties polylineLayerProperties,
   MapController? mapController,
 }) async {
   var method = client == null ? get : client.get;
@@ -98,33 +98,34 @@ Future<List<Polygon>> _networkPolygons(
   return _string(
     string,
     layerMap: layerProperties,
-    polygonPropertie: polygonLayerProperties,
+    polylinePropertie: polylineLayerProperties,
     mapController: mapController,
   );
 }
 
-List<Polygon> _string(
+List<Polyline> _string(
   String string, {
-  Map<LayerPolygonIndexes, String>? layerMap,
-  required PolygonProperties polygonPropertie,
+  Map<LayerPolylineIndexes, String>? layerMap,
+  required PolylineProperties polylinePropertie,
   MapController? mapController,
 }) {
   final geojson = GeoJSONFeatureCollection.fromMap(jsonDecode(string));
-  List<List<Polygon>> polygons = geojson.features.map((elm) {
+
+  List<List<Polyline>> polylines = geojson.features.map((elm) {
     if (elm != null) {
       var geometry = elm.geometry;
       var properties = elm.properties;
-      var polygonProperties = PolygonProperties.fromMap(
+      var polylineProperties = PolylineProperties.fromMap(
         properties,
         layerMap,
-        polygonLayerProperties: polygonPropertie,
+        polylineLayerProperties: polylinePropertie,
       );
-      if (geometry is GeoJSONPolygon) {
-        return [geometry.coordinates.toPolygon(polygonProperties: polygonProperties)];
-      } else if (geometry is GeoJSONMultiPolygon) {
+      if (geometry is GeoJSONLineString) {
+        return [geometry.coordinates.toPolyline(polylineProperties: polylineProperties)];
+      } else if (geometry is GeoJSONMultiLineString) {
         var coordinates = geometry.coordinates;
         return coordinates.map((e) {
-          return e.toPolygon(polygonProperties: polygonProperties);
+          return e.toPolyline(polylineProperties: polylineProperties);
         }).toList();
       }
       var bbox = elm.bbox;
@@ -136,39 +137,39 @@ List<Polygon> _string(
         mapController.fitBounds(latLngBounds);
       }
     }
-    return [Polygon(points: [])];
+    return [Polyline(points: [])];
   }).toList();
-  return polygons.expand((element) => element).toList();
+  return polylines.expand((element) => element).toList();
 }
 
-class GeoJSONPolygons {
+class GeoJSONPolylines {
   static Widget network(
     String url, {
     Client? client,
     Map<String, String>? headers,
-    Map<LayerPolygonIndexes, String>? layerProperties,
-    PolygonProperties polygonLayerProperties = const PolygonProperties(),
+    Map<LayerPolylineIndexes, String>? layerProperties,
+    PolylineProperties polylineLayerProperties = const PolylineProperties(),
     MapController? mapController,
     Key? key,
-    bool polygonCulling = false,
+    bool polylineCulling = false,
   }) {
     var uriString = url.toUri();
     return FutureBuilder(
-      future: _networkPolygons(
+      future: _networkPolylines(
         uriString,
         headers: headers,
         client: client,
         layerProperties: layerProperties,
-        polygonLayerProperties: polygonLayerProperties,
+        polylineLayerProperties: polylineLayerProperties,
         mapController: mapController,
       ),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
-            return PolygonLayer(
-              polygons: snap.data ?? [],
+            return PolylineLayer(
+              polylines: snap.data ?? [],
               key: key,
-              polygonCulling: polygonCulling,
+              polylineCulling: polylineCulling,
             );
           }
         } else if (snap.connectionState == ConnectionState.waiting) {
@@ -181,26 +182,26 @@ class GeoJSONPolygons {
 
   static Widget asset(
     String url, {
-    Map<LayerPolygonIndexes, String>? layerProperties,
-    PolygonProperties polygonProperties = const PolygonProperties(),
+    Map<LayerPolylineIndexes, String>? layerProperties,
+    PolylineProperties polylineProperties = const PolylineProperties(),
     MapController? mapController,
     Key? key,
-    bool polygonCulling = false,
+    bool polylineCulling = false,
   }) {
     return FutureBuilder(
-      future: _assetPolygons(
+      future: _assetPolylines(
         url,
         layerProperties: layerProperties,
-        polygonProperties: polygonProperties,
+        polylineProperties: polylineProperties,
         mapController: mapController,
       ),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
-            return PolygonLayer(
-              polygons: snap.data ?? [],
+            return PolylineLayer(
+              polylines: snap.data ?? [],
               key: key,
-              polygonCulling: polygonCulling,
+              polylineCulling: polylineCulling,
             );
           }
         } else if (snap.connectionState == ConnectionState.waiting) {
@@ -213,27 +214,27 @@ class GeoJSONPolygons {
 
   static Widget file(
     String path, {
-    Map<LayerPolygonIndexes, String>? layerProperties,
-    PolygonProperties polygonLayerProperties = const PolygonProperties(),
+    Map<LayerPolylineIndexes, String>? layerProperties,
+    PolylineProperties polylineLayerProperties = const PolylineProperties(),
     MapController? mapController,
     Key? key,
-    bool polygonCulling = false,
+    bool polylineCulling = false,
   }) {
     return FutureBuilder(
-      future: _filePolygons(
+      future: _filePolylines(
         path,
         layerProperties: layerProperties,
-        polygonLayerProperties: polygonLayerProperties,
+        polylineLayerProperties: polylineLayerProperties,
         mapController: mapController,
       ),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
             var data = snap.data ?? [];
-            return PolygonLayer(
-              polygons: data,
+            return PolylineLayer(
+              polylines: data,
               key: key,
-              polygonCulling: polygonCulling,
+              polylineCulling: polylineCulling,
             );
           }
         } else if (snap.connectionState == ConnectionState.waiting) {
@@ -246,26 +247,26 @@ class GeoJSONPolygons {
 
   static Widget memory(
     Uint8List bytes, {
-    Map<LayerPolygonIndexes, String>? layerProperties,
-    PolygonProperties polygonLayerProperties = const PolygonProperties(),
+    Map<LayerPolylineIndexes, String>? layerProperties,
+    PolylineProperties polylineLayerProperties = const PolylineProperties(),
     MapController? mapController,
     Key? key,
-    bool polygonCulling = false,
+    bool polylineCulling = false,
   }) {
     return FutureBuilder(
-      future: _memoryPolygons(
+      future: _memoryPolylines(
         bytes,
         layerProperties: layerProperties,
-        polygonLayerProperties: polygonLayerProperties,
+        polylineLayerProperties: polylineLayerProperties,
         mapController: mapController,
       ),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
-            return PolygonLayer(
-              polygons: snap.data ?? [],
+            return PolylineLayer(
+              polylines: snap.data ?? [],
               key: key,
-              polygonCulling: polygonCulling,
+              polylineCulling: polylineCulling,
             );
           }
         } else if (snap.connectionState == ConnectionState.waiting) {
@@ -278,19 +279,19 @@ class GeoJSONPolygons {
 
   static Widget string(
     String data, {
-    Map<LayerPolygonIndexes, String>? layerProperties,
-    PolygonProperties polygonLayerProperties = const PolygonProperties(),
+    Map<LayerPolylineIndexes, String>? layerProperties,
+    PolylineProperties polylineLayerProperties = const PolylineProperties(),
     MapController? mapController,
     Key? key,
-    bool polygonCulling = false,
+    bool polylineCulling = false,
   }) {
-    return PolygonLayer(
-      polygons: _string(
+    return PolylineLayer(
+      polylines: _string(
         data,
-        polygonPropertie: polygonLayerProperties,
+        polylinePropertie: polylineLayerProperties,
       ),
       key: key,
-      polygonCulling: polygonCulling,
+      polylineCulling: polylineCulling,
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:template_skeleton/utils/console.dart';
+import 'package:console_tools/console_tools.dart';
 
 stripJSON(String str) {
   return str.replaceAll('\\n', "\\n").replaceAll('\\t', "\\t");
@@ -39,7 +39,7 @@ parseGeometryType(String type) {
 
 featureToGeo(Map<String, dynamic> featureIn, String geomType) {
   Map<String, dynamic> geometry = {};
-  Console.log(geometry['type'], color: ConsoleColors.violet);
+  Console.log(geometry['type'], color: ConsoleColors.middleBluePurple);
   geometry['type'] = geomType;
 
   // grab the rings to coordinates
@@ -77,7 +77,7 @@ deserialize(js) {
   var o = jsonToObject(js);
   String result;
   /* if (null != o) { */
-  Console.log(o['geometryType'], color: ConsoleColors.red);
+  Console.log(o['geometryType'], color: ConsoleColors.roseRed);
   var geomType = parseGeometryType(o['geometryType']);
 
   var features = [];
