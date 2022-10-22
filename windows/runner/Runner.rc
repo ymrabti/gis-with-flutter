@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "template_skeleton" "\0"
+            VALUE "FileDescription", "geoflutter" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "template_skeleton" "\0"
+            VALUE "InternalName", "geoflutter" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "template_skeleton.exe" "\0"
-            VALUE "ProductName", "template_skeleton" "\0"
+            VALUE "OriginalFilename", "geoflutter.exe" "\0"
+            VALUE "ProductName", "geoflutter" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

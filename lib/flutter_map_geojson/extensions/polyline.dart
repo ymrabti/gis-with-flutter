@@ -1,45 +1,20 @@
 import 'package:dart_jts/dart_jts.dart' as dart_jts;
-import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 
-import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polyline/properties.dart';
-import 'package:template_skeleton/flutter_map_geojson/utils.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/extensions.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polyline/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/utils.dart';
 
 extension PolylinesX on List<Polyline> {
-  List<Polygon> toBuffers(double radius) {
-    return map((e) => e.buffer(radius)).toList();
-  }
-
-  List<Polygon> toBuffersWithOriginals(double radius) {
-    return map((e) => e.toBuffer(radius)).toList();
+  List<Polygon> toBuffers(double radius, PolygonProperties polygonProperties) {
+    return map((e) => e.buffer(radius, polygonProperties)).toList();
   }
 }
 
 extension PolylineX on Polyline {
-  static bool fromRange() {
-    return true;
-  }
-
-  Polygon toBuffer(double radius) {
-    return buffer(radius);
-  }
-
-  double area() {
-    return dart_jts.Area.ofRing(
-      points.toCoordinatesProjted(),
-    );
-  }
-
-  Polygon buffer(double radius) {
-    // var precesion = dart_jts.PrecisionModel.fixedPrecision(0);
-    //
+  Polygon buffer(double radius, PolygonProperties polygonProperties) {
     var listCoordinate = points.toCoordinates();
-    // var listLinearRing = dart_jts.LinearRing(listCoordinate, precesion, 10);
-    //
-
-    // consoleLog(holesLineString.length);
-//
     final geometryFactory = dart_jts.GeometryFactory.defaultPrecision();
     final polylines = geometryFactory.createLineString(listCoordinate);
     var distanceDMS = dmFromMeters(radius);
@@ -49,12 +24,17 @@ extension PolylineX on Polyline {
     var polygon = Polygon(
       points: listPointsPolyline,
       isFilled: true,
-      color: color,
-      borderColor: borderColor ?? const Color(0xFF002CA3),
-      borderStrokeWidth: borderStrokeWidth,
-      isDotted: isDotted,
-      strokeCap: strokeCap,
-      strokeJoin: strokeJoin,
+      color: polygonProperties.fillColor,
+      borderColor: polygonProperties.borderColor,
+      borderStrokeWidth: polygonProperties.borderStokeWidth,
+      isDotted: polygonProperties.isDotted,
+      strokeCap: polygonProperties.strokeCap,
+      disableHolesBorder: polygonProperties.disableHolesBorder,
+      label: polygonProperties.label,
+      labelPlacement: polygonProperties.labelPlacement,
+      labelStyle: polygonProperties.labelStyle,
+      rotateLabel: polygonProperties.rotateLabel,
+      strokeJoin: polygonProperties.strokeJoin,
     );
     return polygon;
   }
@@ -67,9 +47,9 @@ extension PolylineXX on List<List<double>> {
       gradientColors: polylineProperties.gradientColors,
       strokeWidth: polylineProperties.strokeWidth,
       points: toLatLng(),
-      color: polylineProperties.fillColor,
+      color: polylineProperties.color,
       borderColor: polylineProperties.borderColor,
-      borderStrokeWidth: polylineProperties.borderStokeWidth,
+      borderStrokeWidth: polylineProperties.borderStrokeWidth,
       isDotted: polylineProperties.isDotted,
       strokeCap: polylineProperties.strokeCap,
       strokeJoin: polylineProperties.strokeJoin,

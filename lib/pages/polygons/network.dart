@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/index.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/markers/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/index.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/properties.dart';
 
 class NetworkGeoJSONPolygon extends StatelessWidget {
   const NetworkGeoJSONPolygon({
@@ -16,13 +17,24 @@ class NetworkGeoJSONPolygon extends StatelessWidget {
   Widget build(BuildContext context) {
     return GeoJSONPolygons.network(
       "https://ymrabti.github.io/undisclosed-tools/assets/geojson/polygons.json",
+      bufferOptions: BufferOptions(
+        buffer: 20,
+        // buffersOnly: true,
+        polygonBufferProperties: PolygonProperties(
+          fillColor: Colors.red.withOpacity(0.5),
+          borderStokeWidth: 4,
+          isDotted: true,
+          borderColor: Colors.green,
+        ),
+      ),
       layerProperties: {
         LayerPolygonIndexes.fillColor: 'COLOR',
         LayerPolygonIndexes.label: 'ECO_NAME',
       },
-      polygonLayerProperties: const PolygonProperties(
+      polygonProperties: const PolygonProperties(
         isDotted: false,
         rotateLabel: true,
+        borderStokeWidth: 0.02,
         fillColor: Color(0xFF17CD11),
         labelStyle: TextStyle(
           fontStyle: FontStyle.italic,

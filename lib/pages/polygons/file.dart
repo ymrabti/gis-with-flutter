@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/index.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/markers/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/index.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/properties.dart';
 
 class FileGeoJSONPolygon extends StatelessWidget {
   const FileGeoJSONPolygon({
@@ -16,7 +17,18 @@ class FileGeoJSONPolygon extends StatelessWidget {
   Widget build(BuildContext context) {
     return GeoJSONPolygons.file(
       "/storage/emulated/0/Android/data/com.ymrabtiapps.gisflutter/files/geojson.json",
-      polygonLayerProperties: const PolygonProperties(
+      bufferOptions: BufferOptions(
+        buffer: 700,
+        // buffersOnly: true,
+        polygonBufferProperties: PolygonProperties(
+          fillColor: const Color(0xFF6D05A8).withOpacity(0.5),
+          borderStokeWidth: 0.3,
+          label: 'Buffer',
+          isDotted: false,
+          borderColor: Colors.green,
+        ),
+      ),
+      polygonProperties: const PolygonProperties(
         isDotted: false,
         rotateLabel: true,
         label: 'File',

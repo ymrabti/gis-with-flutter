@@ -1,4 +1,4 @@
-package com.example.template_skeleton
+package com.example.geoflutter
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:template_skeleton/flutter_map_arcgis/util.dart';
-import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
-import 'package:template_skeleton/flutter_map_geojson/extensions/polygon.dart';
+import 'package:geoflutter/flutter_map_arcgis/util.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/extensions.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/polygon.dart';
 import 'feature_layer_options.dart';
 import 'package:tuple/tuple.dart';
 import 'package:http/http.dart';
@@ -290,7 +290,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
                   borderStrokeSize: render.borderStrokeWidth,
                   coleur: render.coleur,
                   borderColeur: render.borderColor,
-                  isdotted: render.isDotted,
+                  isdotted: render.rotate,
                   isfilled: render.isfilled,
                   attributes: feature["attributes"],
                 ));
@@ -312,7 +312,7 @@ class _FeatureLayerState extends State<FeatureLayer> {
                   coleur: render.borderStrokeWidth,
                   borderStrokeSize: render.coleur,
                   borderColeur: render.borderColor,
-                  isdotted: render.isDotted,
+                  isdotted: render.rotate,
                   attributes: feature["attributes"],
                 ));
               }

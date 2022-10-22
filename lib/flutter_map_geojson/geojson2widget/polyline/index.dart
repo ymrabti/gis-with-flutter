@@ -5,15 +5,17 @@ import 'package:console_tools/console_tools.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/markers/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/properties.dart';
 import 'package:geojson_vi/geojson_vi.dart';
 import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:template_skeleton/flutter_map_geojson/extensions/polyline.dart';
-import 'package:template_skeleton/flutter_map_geojson/utils.dart';
-import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polyline/properties.dart';
-import 'package:template_skeleton/utils/lists.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/polyline.dart';
+import 'package:geoflutter/flutter_map_geojson/utils.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/extensions.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polyline/properties.dart';
+import 'package:geoflutter/utils/lists.dart';
 
 Future<File> _createFile() async {
   var instance = await SharedPreferences.getInstance();
@@ -152,6 +154,8 @@ class GeoJSONPolylines {
     MapController? mapController,
     Key? key,
     bool polylineCulling = false,
+    bool saveLayers = false,
+    BufferOptions? bufferOptions,
   }) {
     var uriString = url.toUri();
     return FutureBuilder(
@@ -166,10 +170,23 @@ class GeoJSONPolylines {
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
-            return PolylineLayer(
-              polylines: snap.data ?? [],
-              key: key,
-              polylineCulling: polylineCulling,
+            var polylines2 = snap.data ?? [];
+            return Stack(
+              children: [
+                PolylineLayer(
+                  saveLayers: saveLayers,
+                  polylines: polylines2,
+                  key: key,
+                  polylineCulling: polylineCulling,
+                ),
+                if (bufferOptions != null)
+                  PolygonLayer(
+                    polygons: polylines2.toBuffers(
+                      bufferOptions.buffer,
+                      bufferOptions.polygonBufferProperties ?? const PolygonProperties(),
+                    ),
+                  ),
+              ],
             );
           }
         } else if (snap.connectionState == ConnectionState.waiting) {
@@ -186,7 +203,9 @@ class GeoJSONPolylines {
     PolylineProperties polylineProperties = const PolylineProperties(),
     MapController? mapController,
     Key? key,
+    BufferOptions? bufferOptions,
     bool polylineCulling = false,
+    bool saveLayers = false,
   }) {
     return FutureBuilder(
       future: _assetPolylines(
@@ -198,10 +217,23 @@ class GeoJSONPolylines {
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
-            return PolylineLayer(
-              polylines: snap.data ?? [],
-              key: key,
-              polylineCulling: polylineCulling,
+            var polylines2 = snap.data ?? [];
+            return Stack(
+              children: [
+                PolylineLayer(
+                  saveLayers: saveLayers,
+                  polylines: polylines2,
+                  key: key,
+                  polylineCulling: polylineCulling,
+                ),
+                if (bufferOptions != null)
+                  PolygonLayer(
+                    polygons: polylines2.toBuffers(
+                      bufferOptions.buffer,
+                      bufferOptions.polygonBufferProperties ?? const PolygonProperties(),
+                    ),
+                  ),
+              ],
             );
           }
         } else if (snap.connectionState == ConnectionState.waiting) {
@@ -219,6 +251,8 @@ class GeoJSONPolylines {
     MapController? mapController,
     Key? key,
     bool polylineCulling = false,
+    bool saveLayers = false,
+    BufferOptions? bufferOptions,
   }) {
     return FutureBuilder(
       future: _filePolylines(
@@ -230,11 +264,23 @@ class GeoJSONPolylines {
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
-            var data = snap.data ?? [];
-            return PolylineLayer(
-              polylines: data,
-              key: key,
-              polylineCulling: polylineCulling,
+            var polylines2 = snap.data ?? [];
+            return Stack(
+              children: [
+                PolylineLayer(
+                  saveLayers: saveLayers,
+                  polylines: polylines2,
+                  key: key,
+                  polylineCulling: polylineCulling,
+                ),
+                if (bufferOptions != null)
+                  PolygonLayer(
+                    polygons: polylines2.toBuffers(
+                      bufferOptions.buffer,
+                      bufferOptions.polygonBufferProperties ?? const PolygonProperties(),
+                    ),
+                  ),
+              ],
             );
           }
         } else if (snap.connectionState == ConnectionState.waiting) {
@@ -252,6 +298,8 @@ class GeoJSONPolylines {
     MapController? mapController,
     Key? key,
     bool polylineCulling = false,
+    bool saveLayers = false,
+    BufferOptions? bufferOptions,
   }) {
     return FutureBuilder(
       future: _memoryPolylines(
@@ -263,10 +311,23 @@ class GeoJSONPolylines {
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
-            return PolylineLayer(
-              polylines: snap.data ?? [],
-              key: key,
-              polylineCulling: polylineCulling,
+            var polylines2 = snap.data ?? [];
+            return Stack(
+              children: [
+                PolylineLayer(
+                  saveLayers: saveLayers,
+                  polylines: polylines2,
+                  key: key,
+                  polylineCulling: polylineCulling,
+                ),
+                if (bufferOptions != null)
+                  PolygonLayer(
+                    polygons: polylines2.toBuffers(
+                      bufferOptions.buffer,
+                      bufferOptions.polygonBufferProperties ?? const PolygonProperties(),
+                    ),
+                  ),
+              ],
             );
           }
         } else if (snap.connectionState == ConnectionState.waiting) {
@@ -284,14 +345,29 @@ class GeoJSONPolylines {
     MapController? mapController,
     Key? key,
     bool polylineCulling = false,
+    bool saveLayers = false,
+    BufferOptions? bufferOptions,
   }) {
-    return PolylineLayer(
-      polylines: _string(
-        data,
-        polylinePropertie: polylineLayerProperties,
-      ),
-      key: key,
-      polylineCulling: polylineCulling,
+    var string = _string(
+      data,
+      polylinePropertie: polylineLayerProperties,
+    );
+    return Stack(
+      children: [
+        PolylineLayer(
+          saveLayers: saveLayers,
+          polylines: string,
+          key: key,
+          polylineCulling: polylineCulling,
+        ),
+        if (bufferOptions != null)
+          PolygonLayer(
+            polygons: string.toBuffers(
+              bufferOptions.buffer,
+              bufferOptions.polygonBufferProperties ?? const PolygonProperties(),
+            ),
+          ),
+      ],
     );
   }
 }

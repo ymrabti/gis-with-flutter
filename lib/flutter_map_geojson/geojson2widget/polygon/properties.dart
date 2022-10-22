@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/extensions.dart';
 
 enum LayerPolygonIndexes {
   fillColor,

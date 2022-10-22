@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart' as cluster;
 import 'package:latlong2/latlong.dart' as latlong2;
-import 'package:template_skeleton/utils/lists.dart';
+import 'package:geoflutter/utils/lists.dart';
 
 class ClustersMarkers extends StatelessWidget {
   const ClustersMarkers({

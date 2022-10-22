@@ -1,4 +1,4 @@
-# template_skeleton
+# geoflutter
 
 A new Flutter project.
 

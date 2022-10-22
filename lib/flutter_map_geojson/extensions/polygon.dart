@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:console_tools/console_tools.dart';
 import 'dart:math';
 
 import 'package:latlong2/latlong.dart';
@@ -6,27 +7,23 @@ import 'package:dart_jts/dart_jts.dart' as dart_jts;
 import 'package:flutter_map/flutter_map.dart';
 
 import 'package:point_in_polygon/point_in_polygon.dart';
-import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
-import 'package:template_skeleton/flutter_map_geojson/utils.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/extensions.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/utils.dart';
 
 extension PolygonsX on List<Polygon> {
-  List<Polygon> toBuffers(double radius) {
-    return map((e) => e.buffer(radius)).toList();
+  List<Polygon> toBuffers(double radius, PolygonProperties polygonBufferProperties) {
+    return map((e) => e.buffer(radius, polygonProperties: polygonBufferProperties)).toList();
   }
 
-  List<Polygon> toBuffersWithOriginals(double radius) {
-    return map((e) => e.toBuffer(radius)).expand((e) => e).toList();
+  List<Polygon> toBuffersWithOriginals(double radius, PolygonProperties polygonBufferProperties) {
+    return map((e) => e.toBuffer(radius, polygonBufferProperties)).expand((e) => e).toList();
   }
 }
 
 extension PolygonX on Polygon {
-  static bool fromRange() {
-    return true;
-  }
-
-  List<Polygon> toBuffer(double radius) {
-    return [this, buffer(radius)];
+  List<Polygon> toBuffer(double radius, PolygonProperties polygonProperties) {
+    return [buffer(radius, polygonProperties: polygonProperties), this];
   }
 
   double area() {
@@ -35,7 +32,7 @@ extension PolygonX on Polygon {
     );
   }
 
-  Polygon buffer(double radius) {
+  Polygon buffer(double radius, {PolygonProperties? polygonProperties}) {
     var precesion = dart_jts.PrecisionModel.fixedPrecision(0);
     //
     var listCoordinate = points.toCoordinates();
@@ -55,19 +52,21 @@ extension PolygonX on Polygon {
     var listPointsPolygon = bufferBolygon.shell!.points.toCoordinateArray().toLatLng();
     var polygon = Polygon(
       points: listPointsPolygon,
-      isFilled: isFilled,
-      color: color,
-      borderColor: borderColor,
-      borderStrokeWidth: borderStrokeWidth,
-      disableHolesBorder: disableHolesBorder,
       holePointsList: holePointsList,
-      isDotted: isDotted,
-      label: label,
-      labelPlacement: labelPlacement,
-      labelStyle: labelStyle,
-      rotateLabel: rotateLabel,
-      strokeCap: strokeCap,
-      strokeJoin: strokeJoin,
+      isFilled: polygonProperties != null ? polygonProperties.isFilled : isFilled,
+      color: polygonProperties != null ? polygonProperties.fillColor : color,
+      borderColor: polygonProperties != null ? polygonProperties.borderColor : borderColor,
+      borderStrokeWidth:
+          polygonProperties != null ? polygonProperties.borderStokeWidth : borderStrokeWidth,
+      disableHolesBorder:
+          polygonProperties != null ? polygonProperties.disableHolesBorder : disableHolesBorder,
+      isDotted: polygonProperties != null ? polygonProperties.isDotted : isDotted,
+      label: polygonProperties != null ? polygonProperties.label : label,
+      labelPlacement: polygonProperties != null ? polygonProperties.labelPlacement : labelPlacement,
+      labelStyle: polygonProperties != null ? polygonProperties.labelStyle : labelStyle,
+      rotateLabel: polygonProperties != null ? polygonProperties.rotateLabel : rotateLabel,
+      strokeCap: polygonProperties != null ? polygonProperties.strokeCap : strokeCap,
+      strokeJoin: polygonProperties != null ? polygonProperties.strokeJoin : strokeJoin,
     );
     return polygon;
   }
@@ -120,7 +119,6 @@ extension PolygonX on Polygon {
       LatLng vertex1 = points[i - 1];
       LatLng vertex2 = points[i];
 
-      // Check if point is on an horizontal polygon boundary
       if (vertex1.latitude == vertex2.latitude &&
           vertex1.latitude == position.latitude &&
           position.longitude > min(vertex1.longitude, vertex2.longitude) &&
@@ -137,7 +135,6 @@ extension PolygonX on Polygon {
                 (vertex2.latitude - vertex1.latitude) +
             vertex1.longitude;
         if (xinters == position.longitude) {
-          // Check if point is on the polygon boundary (other than horizontal)
           return true;
         }
         if (vertex1.longitude == vertex2.longitude || position.longitude <= xinters) {
@@ -145,8 +142,6 @@ extension PolygonX on Polygon {
         }
       }
     }
-
-    // If the number of edges we passed through is odd, then it's in the polygon.
     return intersections % 2 != 0;
   }
 }

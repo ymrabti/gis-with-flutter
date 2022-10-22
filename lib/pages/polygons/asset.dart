@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/index.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/markers/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/index.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/properties.dart';
 
 class AssetGeoJSONPolygon extends StatelessWidget {
   const AssetGeoJSONPolygon({
@@ -16,6 +17,16 @@ class AssetGeoJSONPolygon extends StatelessWidget {
   Widget build(BuildContext context) {
     return GeoJSONPolygons.asset(
       "assets/geojson.json",
+      bufferOptions: BufferOptions(
+        buffer: 300,
+        buffersOnly: true,
+        /* polygonBufferProperties: PolygonProperties(
+          fillColor: const Color(0xFF6D05A8).withOpacity(0.5),
+          borderStokeWidth: 4,
+          isDotted: true,
+          borderColor: Colors.green,
+        ), */
+      ),
       polygonProperties: const PolygonProperties(
         isDotted: false,
         label: 'Asset',

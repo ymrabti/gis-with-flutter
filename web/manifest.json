@@ -1,6 +1,6 @@
 {
-    "name": "template_skeleton",
-    "short_name": "template_skeleton",
+    "name": "geoflutter",
+    "short_name": "geoflutter",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

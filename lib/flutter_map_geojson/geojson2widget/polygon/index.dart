@@ -5,15 +5,16 @@ import 'package:console_tools/console_tools.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/markers/properties.dart';
 import 'package:geojson_vi/geojson_vi.dart';
 import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:template_skeleton/flutter_map_geojson/extensions/polygon.dart';
-import 'package:template_skeleton/flutter_map_geojson/utils.dart';
-import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
-import 'package:template_skeleton/utils/lists.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/polygon.dart';
+import 'package:geoflutter/flutter_map_geojson/utils.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/extensions.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/properties.dart';
+import 'package:geoflutter/utils/lists.dart';
 
 Future<File> _createFile() async {
   var instance = await SharedPreferences.getInstance();
@@ -147,10 +148,11 @@ class GeoJSONPolygons {
     Client? client,
     Map<String, String>? headers,
     Map<LayerPolygonIndexes, String>? layerProperties,
-    PolygonProperties polygonLayerProperties = const PolygonProperties(),
+    PolygonProperties polygonProperties = const PolygonProperties(),
     MapController? mapController,
     Key? key,
     bool polygonCulling = false,
+    BufferOptions? bufferOptions,
   }) {
     var uriString = url.toUri();
     return FutureBuilder(
@@ -159,14 +161,25 @@ class GeoJSONPolygons {
         headers: headers,
         client: client,
         layerProperties: layerProperties,
-        polygonLayerProperties: polygonLayerProperties,
+        polygonLayerProperties: polygonProperties,
         mapController: mapController,
       ),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
+            var polygons2 = snap.data ?? [];
             return PolygonLayer(
-              polygons: snap.data ?? [],
+              polygons: bufferOptions != null
+                  ? bufferOptions.buffersOnly
+                      ? polygons2.toBuffers(
+                          bufferOptions.buffer,
+                          bufferOptions.polygonBufferProperties ?? polygonProperties,
+                        )
+                      : polygons2.toBuffersWithOriginals(
+                          bufferOptions.buffer,
+                          bufferOptions.polygonBufferProperties ?? polygonProperties,
+                        )
+                  : polygons2,
               key: key,
               polygonCulling: polygonCulling,
             );
@@ -186,6 +199,7 @@ class GeoJSONPolygons {
     MapController? mapController,
     Key? key,
     bool polygonCulling = false,
+    BufferOptions? bufferOptions,
   }) {
     return FutureBuilder(
       future: _assetPolygons(
@@ -197,8 +211,19 @@ class GeoJSONPolygons {
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
+            var polygons2 = snap.data ?? [];
             return PolygonLayer(
-              polygons: snap.data ?? [],
+              polygons: bufferOptions != null
+                  ? bufferOptions.buffersOnly
+                      ? polygons2.toBuffers(
+                          bufferOptions.buffer,
+                          bufferOptions.polygonBufferProperties ?? polygonProperties,
+                        )
+                      : polygons2.toBuffersWithOriginals(
+                          bufferOptions.buffer,
+                          bufferOptions.polygonBufferProperties ?? polygonProperties,
+                        )
+                  : polygons2,
               key: key,
               polygonCulling: polygonCulling,
             );
@@ -214,24 +239,35 @@ class GeoJSONPolygons {
   static Widget file(
     String path, {
     Map<LayerPolygonIndexes, String>? layerProperties,
-    PolygonProperties polygonLayerProperties = const PolygonProperties(),
+    PolygonProperties polygonProperties = const PolygonProperties(),
     MapController? mapController,
     Key? key,
     bool polygonCulling = false,
+    BufferOptions? bufferOptions,
   }) {
     return FutureBuilder(
       future: _filePolygons(
         path,
         layerProperties: layerProperties,
-        polygonLayerProperties: polygonLayerProperties,
+        polygonLayerProperties: polygonProperties,
         mapController: mapController,
       ),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
-            var data = snap.data ?? [];
+            var polygons2 = snap.data ?? [];
             return PolygonLayer(
-              polygons: data,
+              polygons: bufferOptions != null
+                  ? bufferOptions.buffersOnly
+                      ? polygons2.toBuffers(
+                          bufferOptions.buffer,
+                          bufferOptions.polygonBufferProperties ?? polygonProperties,
+                        )
+                      : polygons2.toBuffersWithOriginals(
+                          bufferOptions.buffer,
+                          bufferOptions.polygonBufferProperties ?? polygonProperties,
+                        )
+                  : polygons2,
               key: key,
               polygonCulling: polygonCulling,
             );
@@ -247,23 +283,35 @@ class GeoJSONPolygons {
   static Widget memory(
     Uint8List bytes, {
     Map<LayerPolygonIndexes, String>? layerProperties,
-    PolygonProperties polygonLayerProperties = const PolygonProperties(),
+    PolygonProperties polygonProperties = const PolygonProperties(),
     MapController? mapController,
     Key? key,
+    BufferOptions? bufferOptions,
     bool polygonCulling = false,
   }) {
     return FutureBuilder(
       future: _memoryPolygons(
         bytes,
         layerProperties: layerProperties,
-        polygonLayerProperties: polygonLayerProperties,
+        polygonLayerProperties: polygonProperties,
         mapController: mapController,
       ),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasData) {
+            var polygons2 = snap.data ?? [];
             return PolygonLayer(
-              polygons: snap.data ?? [],
+              polygons: bufferOptions != null
+                  ? bufferOptions.buffersOnly
+                      ? polygons2.toBuffers(
+                          bufferOptions.buffer,
+                          bufferOptions.polygonBufferProperties ?? polygonProperties,
+                        )
+                      : polygons2.toBuffersWithOriginals(
+                          bufferOptions.buffer,
+                          bufferOptions.polygonBufferProperties ?? polygonProperties,
+                        )
+                  : polygons2,
               key: key,
               polygonCulling: polygonCulling,
             );
@@ -279,16 +327,28 @@ class GeoJSONPolygons {
   static Widget string(
     String data, {
     Map<LayerPolygonIndexes, String>? layerProperties,
-    PolygonProperties polygonLayerProperties = const PolygonProperties(),
+    PolygonProperties polygonProperties = const PolygonProperties(),
     MapController? mapController,
     Key? key,
+    BufferOptions? bufferOptions,
     bool polygonCulling = false,
   }) {
+    var polygons2 = _string(
+      data,
+      polygonPropertie: polygonProperties,
+    );
     return PolygonLayer(
-      polygons: _string(
-        data,
-        polygonPropertie: polygonLayerProperties,
-      ),
+      polygons: bufferOptions != null
+          ? bufferOptions.buffersOnly
+              ? polygons2.toBuffers(
+                  bufferOptions.buffer,
+                  bufferOptions.polygonBufferProperties ?? polygonProperties,
+                )
+              : polygons2.toBuffersWithOriginals(
+                  bufferOptions.buffer,
+                  bufferOptions.polygonBufferProperties ?? polygonProperties,
+                )
+          : polygons2,
       key: key,
       polygonCulling: polygonCulling,
     );

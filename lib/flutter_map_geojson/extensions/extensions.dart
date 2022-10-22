@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:dart_jts/dart_jts.dart' as dart_jts;
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polyline/properties.dart';
 
 extension StringX on String {
   Uri toUri() {
@@ -54,10 +51,20 @@ extension LantLngCoordinate<T> on List<dart_jts.Coordinate> {
 
 extension Coordinatex on List<LatLng> {
   List<dart_jts.Coordinate> toCoordinates() {
-    return map((e) => dart_jts.Coordinate(e.latitude, e.longitude)).toList();
+    return map((e) => e.toCoordinate()).toList();
   }
 
   List<dart_jts.Coordinate> toCoordinatesProjted() {
-    return map((e) => dart_jts.Coordinate(e.latitude * 6371e3, e.longitude * 6371e3)).toList();
+    return map((e) => e.toCoordinateProjted()).toList();
+  }
+}
+
+extension CoordinateXX on LatLng {
+  dart_jts.Coordinate toCoordinate() {
+    return dart_jts.Coordinate(latitude, longitude);
+  }
+
+  dart_jts.Coordinate toCoordinateProjted() {
+    return dart_jts.Coordinate(latitude * 6371e3, longitude * 6371e3);
   }
 }

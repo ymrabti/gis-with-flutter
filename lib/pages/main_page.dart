@@ -2,19 +2,21 @@ import 'package:console_tools/console_tools.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/plugin_api.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/markers/index.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/markers/properties.dart';
 import 'package:latlong2/latlong.dart' as latlong2;
-import 'package:template_skeleton/flutter_map_geojson/extensions/extensions.dart';
-import 'package:template_skeleton/flutter_map_geojson/extensions/polygon.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polygon/properties.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polyline/index.dart';
-import 'package:template_skeleton/flutter_map_geojson/geojson2widget/polyline/properties.dart';
-import 'package:template_skeleton/pages/markers/index.dart';
-import 'package:template_skeleton/pages/polygons/asset.dart';
-import 'package:template_skeleton/pages/polygons/file.dart';
-import 'package:template_skeleton/pages/polygons/network.dart';
-import 'package:template_skeleton/pages/polygons/string.dart';
-import 'package:template_skeleton/utils/lists.dart';
-import 'package:template_skeleton/models/class.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/extensions.dart';
+import 'package:geoflutter/flutter_map_geojson/extensions/polygon.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polygon/properties.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polyline/index.dart';
+import 'package:geoflutter/flutter_map_geojson/geojson2widget/polyline/properties.dart';
+import 'package:geoflutter/pages/markers/index.dart';
+import 'package:geoflutter/pages/polygons/asset.dart';
+import 'package:geoflutter/pages/polygons/file.dart';
+import 'package:geoflutter/pages/polygons/network.dart';
+import 'package:geoflutter/pages/polygons/string.dart';
+import 'package:geoflutter/utils/lists.dart';
+import 'package:geoflutter/models/class.dart';
 import '../settings/settings_view.dart';
 
 /// Displays a list of SampleItems.
@@ -92,7 +94,39 @@ class _GeojsonTestsPageState extends State<GeojsonTestsPage> {
 
           GeoJSONPolylines.asset(
             'assets/lignesassets.geojson',
-            polylineProperties: const PolylineProperties(isDotted: true, isFilled: false),
+            bufferOptions: BufferOptions(
+              buffer: 50,
+              polygonBufferProperties: const PolygonProperties(
+                borderStokeWidth: 0,
+                fillColor: Color(0x8DF436AB),
+              ),
+            ),
+            polylineProperties: const PolylineProperties(
+              isDotted: false,
+              borderStrokeWidth: 0,
+              borderColor: Colors.red,
+              strokeWidth: 3,
+              color: Colors.transparent,
+              gradientColors: Colors.primaries,
+            ),
+          ),
+          GeoJSONMarkers.asset(
+            'assets/points-assets.geojson',
+            // bufferOptions: BufferOptions(buffer: 20),
+            markerProperties: MarkerProperties(
+              builder: (p0) {
+                return const Icon(Icons.location_on, color: Colors.red);
+              },
+            ),
+          ),
+          GeoJSONMarkers.asset(
+            'assets/multipoints-assets.geojson',
+            layerBufferProperties: {},
+            markerProperties: MarkerProperties(
+              builder: (p0) {
+                return const Icon(Icons.location_off, color: Colors.blue);
+              },
+            ),
           ),
           //   MarkerLayer(markers: getMarkers()),
           CircleLayer(circles: [
