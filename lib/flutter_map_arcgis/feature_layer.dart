@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geoflutter/flutter_map_arcgis/util.dart';
-import 'package:geoflutter/flutter_map_geojson/extensions/extensions.dart';
-import 'package:geoflutter/flutter_map_geojson/extensions/polygon.dart';
 import 'feature_layer_options.dart';
 import 'package:tuple/tuple.dart';
 import 'package:http/http.dart';
@@ -167,7 +165,8 @@ class _FeatureLayerState extends State<FeatureLayer> {
   void _findTapedPolygon(LatLng position) {
     for (var polygon in features) {
       var polygonx = polygon as PolygonEsri;
-      var isInclude = polygonx.isGeoPointInsidePolygon(position);
+      var isInclude = true;
+      //   polygonx.isGeoPointInsidePolygon(position);
       if (isInclude) {
         widget.options.onTap!(polygonx.attributes, position);
       } else {
